@@ -86,6 +86,7 @@ pinit(int pol)
   extern char _binary_initcode_start[], _binary_initcode_size[];
 
   p = allocproc();
+  p->policy = pol;
   
   initproc = p;
 
@@ -119,6 +120,8 @@ scheduler(void)
   struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
+
+  int turn = 0;
   
   for(;;){
     // Enable interrupts on this processor.
@@ -129,12 +132,29 @@ scheduler(void)
       if(p->state != RUNNABLE)
         continue;
 
+      int fg_ = 0;
+      int bg_ = 0;
+
+      struct proc *tmp;
+      for (tmp = ptable.proc; tmp < &ptable.proc[NPROC]; tmp++) {
+        if (tmp->state == RUNNABLE) {
+          if (tmp->policy == 0) fg_ = 1;
+          else if (tmp->policy == 1) bg_ = 1;
+        }
+      }
+
+      int _policy;
+      _policy = (turn < 9) ? (fg_ ? 0 : 1) : (bg_ ? 0 : 1);
+
+      if (p->policy != _policy) continue;
       // Switch to chosen process. 
       c->proc = p;
       p->state = RUNNING;
 
       switchuvm(p);
       swtch(&(c->scheduler), p->context);
+
+      turn = (turn + 1) % 10;
     }
   }
 }

@@ -11,12 +11,20 @@ int
 sys_set_sched_policy(void)
 {
     // Implement your code here 
-    return -1;
+    int policy;
+
+    if (argint(0, &policy) < 0) return -22;
+
+    if (policy < 0 || policy > 1) return -22;
+
+    myproc()->policy = policy;
+
+    return 0;
 }
 
 int 
 sys_get_sched_policy(void)
 {
     // Implement your code here 
-    return -1;
+    return myproc()->policy;
 }
