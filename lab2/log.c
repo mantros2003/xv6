@@ -183,7 +183,15 @@ log_write(struct buf *b)
       break;
   }
   log.lh.block[i] = b->blockno;
-  if (i == log.lh.n)
+  if (i == log.lh.n) {
     log.lh.n++;
-  b->flags |= B_DIRTY; // prevent eviction
+  }
+
+  struct buf *lbuf = bread(b->dev, log.start + i + 1);
+  memmove(lbuf->data, b->old, BSIZE);
+
+  bwrite(lbuf);
+  brelse(lbuf);
+
+  b->flags |= B_DIRTY;
 }
