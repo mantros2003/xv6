@@ -33,7 +33,7 @@ pte_t* get_victim_page(struct proc *p) {
         /* Your code here */
         /* -------------------------------------------------------------- */
         for (uint va = 0; va < p->sz; va += PGSIZE) {
-        pte = walkpgdir(p->pgdir, (void*) va, 0);// If the PTE exists, is present in memory, and is a user page
+        pte = walkpgdir(pde, (void*) va, 0);
             if (pte && (*pte & PTE_P) && (*pte & PTE_U)) {
                 // Check if the Accessed bit is NOT set
                 if ((*pte & PTE_A) == 0) {
